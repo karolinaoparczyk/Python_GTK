@@ -1,0 +1,4 @@
+title User can see routines
+
+User->Routine: Open to see details
+note right of Routine: Has a name, image and publication date

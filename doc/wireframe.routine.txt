@@ -1,0 +1,6 @@
+title Each routine has exercises and breaks
+
+Routine->Exercise
+note left of Exercise: Has a name, an image, a discription and length
+Routine->Break
+note right of Break: Has length
