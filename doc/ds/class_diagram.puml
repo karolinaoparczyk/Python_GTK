@@ -9,12 +9,10 @@ class Routine {
 	-String description
 	-String image
 	-String name
-	-DateTime publication_date
 	+void delete()
 	+string get_description()
 	+string get_image()
 	+string get_name()
-	+datetime get_publication_date()
 }
 
 class Exercise {
@@ -36,7 +34,7 @@ class Break {
 }
 @enduml
 
-PlantUML version 1.2019.12beta6(Unknown compile time)
+PlantUML version 1.2019.11(Sun Sep 22 10:02:15 UTC 2019)
 (GPL source distribution)
 Java Runtime: Java(TM) SE Runtime Environment
 JVM: Java HotSpot(TM) 64-Bit Server VM
