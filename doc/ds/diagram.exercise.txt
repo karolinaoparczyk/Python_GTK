@@ -1,6 +1,0 @@
-@startuml
-(Exercise) ..> (Name)
-(Exercise) ..> (Description)
-(Exercise) ..> (Length)
-(Exercise) ..> (Image)
-@enduml

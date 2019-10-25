@@ -1,7 +1,0 @@
-@startuml
-(Routine) ..> (Name)
-(Routine) ..> (Exercises)
-(Routine) ..> (Breaks)
-(Routine) ..> (Publication date)
-(Routine) ..> (Image)
-@enduml

@@ -1,0 +1,35 @@
+@startuml
+() "GUI1" as Window1
+() "GUI2" as Window2
+
+Window1 -- [Widgets]
+Window2 -- [Widgets]
+
+note left of [Widgets]
+	displaying and deleting
+	routines, exercises
+	and breaks
+end note
+note left of Window1 : displaying routines
+note right of Window2
+	displaying exercises
+	and breaks
+end note
+
+database "MongoDB"{
+	frame "Routine" {
+		[Contains exercises and breaks] as R
+	}
+	frame "Exercise"{
+		[Attached to routine] as E
+	}
+	frame "Break"{
+		[Attached to routine] as B
+	}
+}
+
+[Widgets] --- R
+[Widgets] --- E
+[Widgets] --- B
+
+@enduml
