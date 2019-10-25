@@ -1,4 +1,20 @@
-title User can see routines
-
-User->Routine: Open to see details
-note right of Routine: Has a name, image and publication date
+@startsalt
+{^Routines
+..|..|..|..|..|..
+<&image>|*|<&image>|*|<&image>|*
+routine1|*|routine2|*|routine3|*
+"2019-08-09"|*|"2018-12-03"|*|"2019-10-24"|*
+[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete] 
+..|..|..|..|..|..
+<&image>|*|<&image>|*|<&image>|*
+routine4|*|routine5|*|routine6|*
+"2019-08-09"|*|"2018-12-03"|*|"2019-10-24"|*
+[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
+..|..|..|..|..|..
+<&image>|*|<&image>|*|<&image>|*
+routine7|*|routine8|*|routine9|*
+"2019-08-09"|*|"2018-12-03"|*|"2019-10-24"|*
+[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
+..|..|..|..|..|..
+}
+@endsalt

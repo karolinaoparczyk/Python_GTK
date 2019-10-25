@@ -1,6 +1,23 @@
-title Each routine has exercises and breaks
+@startsalt
+{^Routine
+..|..|..
+<&image>|<&image>|<&image>
+exercise1|exercise2|exercise3
+"20 times"|"60 seconds"|" 10 times "
+[delete]|[delete]|[delete]
+..|..|..
+<&image>|<&image>|<&image>  
+exercise4|exercise5|break1  
+"20 times"|"60 seconds"|"10 minutes"  
+[delete]|[delete]|[delete]
+..|..|..
+<&image>|<&image>|<&image>  
+exercise6|exercise7|exercise8  
+"20 times"|"60 seconds"|" 10 times "  
+[delete]|[delete]|[delete]
+..|..|..
+}
+@endsalt
 
-Routine->Exercise
-note left of Exercise: Has a name, an image, a discription and length
-Routine->Break
-note right of Break: Has length
+
+
