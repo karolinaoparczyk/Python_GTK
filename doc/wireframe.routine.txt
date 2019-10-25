@@ -3,17 +3,17 @@
 ..|..|..
 <&image>|<&image>|<&image>
 exercise1|exercise2|exercise3
-"20 times"|"60 seconds"|" 10 times "
+"20 seconds"|"60 seconds"|" 10 seconds  "
 [delete]|[delete]|[delete]
 ..|..|..
 <&image>|<&image>|<&image>  
 exercise4|exercise5|break1  
-"20 times"|"60 seconds"|"10 minutes"  
+"20 seconds"|"60 seconds"|"10000 seconds"  
 [delete]|[delete]|[delete]
 ..|..|..
 <&image>|<&image>|<&image>  
 exercise6|exercise7|exercise8  
-"20 times"|"60 seconds"|" 10 times "  
+"20 seconds"|"60 seconds"|" 10 seconds  "  
 [delete]|[delete]|[delete]
 ..|..|..
 }
