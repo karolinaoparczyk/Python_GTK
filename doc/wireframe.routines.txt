@@ -1,5 +1,5 @@
 @startsalt
-{^Routines
+{^IPM P1
 ..|..|..|..|..|..
 <&image>|*|<&image>|*|<&image>|*
 routine1|*|routine2|*|routine3|*
