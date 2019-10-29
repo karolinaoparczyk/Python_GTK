@@ -4,14 +4,12 @@ control ShowButton
 control DeleteButton
 entity Routine
 entity Exercise
-entity Break
 database Fitness
 
 User -> ShowButton : click
 User -> DeleteButton : click
 User -> Routine : view and delete
 User -> Exercise : view and delete
-User -> Break : view and delete
 ShowButton -> Fitness : get items
 DeleteButton -> Fitness : delete items
 @enduml

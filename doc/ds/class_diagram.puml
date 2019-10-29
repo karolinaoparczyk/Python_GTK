@@ -3,7 +3,6 @@ class_diagram.png
 
 @startuml
 Routine "1" o-- "many"  Exercise
-Routine "1" o-- "many"  Break
 
 class Routine {
 	-String description
@@ -25,12 +24,6 @@ class Exercise {
 	+string get_image()
 	+int get_length()
 	+string get_name()
-}
-
-class Break {
-	-Integer length
-	+void delete()
-	+int get_length()
 }
 @enduml
 
