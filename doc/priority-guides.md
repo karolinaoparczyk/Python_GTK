@@ -4,6 +4,6 @@ To create this application we need:
 - buttons with routines
 - text boxes and images attached to routines
 - buttons to delete routines
-- windows displaying exercises of a routine after clicking the button
+- a window displaying exercises of a chosen routine
 - text boxes and images attached to routines
 - buttons to delete exercises
