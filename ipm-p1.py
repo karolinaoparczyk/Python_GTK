@@ -3,7 +3,7 @@ import os
 import re
 import random
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, GLib
+from gi.repository import Gtk, GdkPixbuf, GLib, Gdk
 from pymongo import MongoClient
 
 from models import Routine, Exercise
@@ -59,6 +59,12 @@ class MyWindow(Gtk.Window):
    		btn_delete = Gtk.Button(label='Delete')
                 btn_delete.connect("clicked", self.delete_routine, routine, self.collection)
                 cell_grid.attach(btn_delete, 1, 2, 1, 1)
+		colorh="#FF0000"        
+		color=Gdk.RGBA()
+		color.parse(colorh)
+		color.to_string()
+
+		btn_delete.override_background_color(Gtk.StateFlags.NORMAL, color)
 
 		self.grid.attach(cell_grid, column, row, 1, 1)
 

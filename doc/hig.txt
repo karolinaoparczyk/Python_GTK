@@ -1,0 +1,6 @@
+colorh="#FF0000"        
+color=Gdk.RGBA()
+color.parse(colorh)
+color.to_string()
+btn_delete.override_background_color(Gtk.StateFlags.NORMAL, color)
+
