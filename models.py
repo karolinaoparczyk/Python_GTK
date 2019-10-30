@@ -11,11 +11,8 @@ class Routine:
 	def get_description(self):
 		return self.description
 
-	def get_img_path(self):
-		return self.image
-
-	def set_img_path(self, img_path):
-		self.img_path = img_path
+	def get_img_string(self):
+		return self.image_string
 
 	def set_exercises(self, exercises):
 		self.exercises = exercises
