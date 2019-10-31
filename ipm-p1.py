@@ -86,10 +86,9 @@ class MyWindow(Gtk.Window):
 
 	def remove_exercise(self, widget, response_id, *data):
         	if response_id == Gtk.ResponseType.OK:
-            		exercise = {"_id": data[0][0].id}
 			self.exercise_list.remove(data[0][0])
 			#self.collection.delete_one(exercise)
-			self.get_workouts()
+			self.get_exercises()
 			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
         		dialog.format_secondary_text("The object has been deleted.")
         		dialog.run()
