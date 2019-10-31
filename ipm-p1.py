@@ -7,7 +7,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib, Gdk, GObject
 from pymongo import MongoClient
 
-from models import Routine, Exercise
+from models import Routine, Exercise, ExerciseToRoutine
 
 client = MongoClient('localhost', 27017)
 db = client.fitness
@@ -42,15 +42,16 @@ class MyWindow(Gtk.Window):
                 while i < len(self.exercise_list):
                         for j in range(3):
 				if current_item_index <= len(self.exercise_list)-1:
-                                	exercise = self.exercise_list[current_item_index]
-					self.add_ex_to_grid(exercise, current_item_index+1, j, i/3)
+					for ex in self.all_exercises:
+						if ex.id == self.exercise_list[current_item_index].exercise_id:                                 	
+							self.add_ex_to_grid(self.exercise_list[current_item_index], ex, current_item_index+1, j, i/3)
 	                                current_item_index = current_item_index + 1
                         i = i + 3
 		self.ex_window.queue_draw()
 		self.ex_window.show_all()
 			
 
-	def add_ex_to_grid(self, exercise, no, column, row):
+	def add_ex_to_grid(self, exercise_to_routine, exercise, no, column, row):
 		
 		cell_grid = Gtk.Grid()
 		number = Gtk.Label(label=no)                
@@ -64,7 +65,7 @@ class MyWindow(Gtk.Window):
 		cell_grid.attach(frame_number, 0, 1, 2, 1)
 
    		btn_delete = Gtk.Button(label='Delete')
-                btn_delete.connect("clicked", self.delete_exercise, exercise, self.collection)
+                btn_delete.connect("clicked", self.delete_exercise, exercise_to_routine, self.workouts)
                 cell_grid.attach(btn_delete, 0, 3, 1, 1)
 
 		colorh="#FF0000"        
@@ -100,11 +101,11 @@ class MyWindow(Gtk.Window):
 	def __init__(self):
                 Gtk.Window.__init__(self, title="IPM P1")
 		self.set_default_size(700, 500)
-		self.collection = db.workouts
+		self.workouts = db.workouts
+		self.exercises = db.exercises
 		
 		self.grid = Gtk.Grid()
 		self.grid.set_column_homogeneous(True)
-		self.grid.set_row_homogeneous(True)
 		self.grid.set_row_spacing(20)
 		self.scrolled_window = Gtk.ScrolledWindow()
 		self.scrolled_window.set_border_width(10)
@@ -112,15 +113,21 @@ class MyWindow(Gtk.Window):
 		self.scrolled_window.add(self.grid)
 
 		self.routine_list = []
+		self.all_exercises = []
 
-		for index, post in enumerate(self.collection.find()):
+		for ex_db in self.exercises.find():
+			exercise = Exercise(ex_db['_id'], ex_db['description'], ex_db['image'], ex_db['name'], ex_db['video'])
+			self.all_exercises.append(exercise)
+
+		for index, post in enumerate(self.workouts.find()):
 			routine = Routine(post['_id'], post['name'], post['description'], post['image'])
-			exercises = []
-			for ex in post['exercises']:
-				id = random.randint(1,100000)
-				exercise = Exercise(id, ex[0], ex[1], routine.id)
-				exercises.append(exercise)
-			routine.set_exercises(exercises)
+			exercises_of_routine = []
+			for routine_ex in post['exercises']:
+				for exercise in self.all_exercises:
+					if routine_ex[0] == exercise.name:
+						ex_of_routine = ExerciseToRoutine(routine.id, exercise.id, routine_ex[1])
+						exercises_of_routine.append(ex_of_routine)	
+			routine.set_exercises(exercises_of_routine)
 			self.routine_list.append(routine)
 		self.get_workouts()
 
@@ -132,19 +139,26 @@ class MyWindow(Gtk.Window):
                 name = Gtk.Label(label=routine.name)
                 frame = Gtk.Frame()
                 frame.add(name)	
+
+		description = Gtk.Label(label=routine.description[0])
+		description.set_line_wrap(True)
+		description.set_size_request(75, 1)
+		frame_d = Gtk.Frame()
+		frame_d.add(description)
 		
+			
 		if img is not None:
 			cell_grid.attach(img, 0, 0, 2, 1)
 		cell_grid.attach(frame, 0, 1, 2, 1)
+		cell_grid.attach(frame_d, 0, 2, 2, 1)
 
 		btn_show = Gtk.Button(label='Show')
                 btn_show.connect("clicked", self.routine_details, routine)
-                cell_grid.attach(btn_show, 0, 2, 1, 1)
+                cell_grid.attach(btn_show, 0, 3, 1, 1)
 
    		btn_delete = Gtk.Button(label='Delete')
-                btn_delete.connect("clicked", self.delete_routine, routine, self.collection)
-                cell_grid.attach(btn_delete, 1, 2, 1, 1)
-
+                btn_delete.connect("clicked", self.delete_routine, routine, self.workouts)
+                cell_grid.attach(btn_delete, 1, 3, 1, 1)
 		colorh="#FF0000"        
 		color=Gdk.RGBA()
 		color.parse(colorh)
@@ -195,7 +209,7 @@ class MyWindow(Gtk.Window):
         	if response_id == Gtk.ResponseType.OK:
             		routine = {"_id": data[0][0].id}
 			self.routine_list.remove(data[0][0])
-			#self.collection.delete_one(routine)
+			#self.workouts.delete_one(routine)
 			self.get_workouts()
 			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
         		dialog.format_secondary_text("The object has been deleted.")

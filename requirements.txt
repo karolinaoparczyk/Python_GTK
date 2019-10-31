@@ -1,0 +1,4 @@
+pyautogui
+python-tk 
+python-dev
+
