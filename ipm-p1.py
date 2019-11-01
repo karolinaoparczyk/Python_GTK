@@ -3,214 +3,255 @@ import os
 import re
 import random
 import time
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, GLib, Gdk, GObject
+import webbrowser
 from pymongo import MongoClient
 
-from models import Routine, Exercise, ExerciseToRoutine
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GdkPixbuf, GLib, Gdk, GObject
+
+from models import Workout, Exercise, ExerciseToWorkout
+
 
 client = MongoClient('localhost', 27017)
 db = client.fitness
 
+
 class MyWindow(Gtk.Window):
 
-	def routine_details(self, widget, *data):
-		self.ex_window = Gtk.Window()
-		self.ex_window.set_size_request(700, 500)
-		title = "Routine {} details".format(data[0].name)
-		self.ex_window.set_title(title
-)
-		self.ex_window.show()
-
-		self.ex_grid = Gtk.Grid()
-		self.ex_grid.set_column_homogeneous(True)
-		self.ex_grid.set_row_homogeneous(True)
-		self.ex_grid.set_row_spacing(20)
-		scrolled_window = Gtk.ScrolledWindow()
-		scrolled_window.set_border_width(10)
-		self.ex_window.add(scrolled_window)
-		scrolled_window.add(self.ex_grid)
-
-		self.exercise_list = data[0].get_exercises()
-		self.get_exercises()
-
-	def get_exercises(self):
-		while(self.ex_grid.get_child_at(0,0)!=None):
-			self.ex_grid.remove_column(0)
-		i = 0
-                current_item_index = 0
-                while i < len(self.exercise_list):
-                        for j in range(3):
-				if current_item_index <= len(self.exercise_list)-1:
-					for ex in self.all_exercises:
-						if ex.id == self.exercise_list[current_item_index].exercise_id:                                 	
-							self.add_ex_to_grid(self.exercise_list[current_item_index], ex, current_item_index+1, j, i/3)
-	                                current_item_index = current_item_index + 1
-                        i = i + 3
-		self.ex_window.queue_draw()
-		self.ex_window.show_all()
-			
-
-	def add_ex_to_grid(self, exercise_to_routine, exercise, no, column, row):
-		
-		cell_grid = Gtk.Grid()
-		number = Gtk.Label(label=no)                
-		name = Gtk.Label(label=exercise.name)
-                frame_name = Gtk.Frame()
-		frame_number = Gtk.Frame()
-                frame_name.add(name)
-		frame_number.add(number)
-
-		cell_grid.attach(frame_name, 0, 2, 2, 1)
-		cell_grid.attach(frame_number, 0, 1, 2, 1)
-
-   		btn_delete = Gtk.Button(label='Delete')
-                btn_delete.connect("clicked", self.delete_exercise, exercise_to_routine, self.workouts)
-                cell_grid.attach(btn_delete, 0, 3, 1, 1)
-
-		colorh="#FF0000"        
-		color=Gdk.RGBA()
-		color.parse(colorh)
-		color.to_string()
-		btn_delete.override_background_color(Gtk.StateFlags.NORMAL, color)
-
-		self.ex_grid.attach(cell_grid, column, row, 1, 1)
-
-	def delete_exercise(self, widget, *data):
-		messagedialog = Gtk.MessageDialog(parent=self,
-						flags=Gtk.DialogFlags.MODAL,
-						type=Gtk.MessageType.WARNING,
-						buttons=Gtk.ButtonsType.OK_CANCEL,
-						message_format="Are you sure you want to delete this object?")
-        	messagedialog.connect("response", self.remove_exercise, data)
-        	messagedialog.show()
-
-	def remove_exercise(self, widget, response_id, *data):
-        	if response_id == Gtk.ResponseType.OK:
-			self.exercise_list.remove(data[0][0])
-			#self.collection.delete_one(exercise)
-			self.get_exercises()
-			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
-        		dialog.format_secondary_text("The object has been deleted.")
-        		dialog.run()
-        		dialog.destroy()
-        	elif response_id == Gtk.ResponseType.CANCEL:
-        		pass
-		widget.destroy()
 
 	def __init__(self):
                 Gtk.Window.__init__(self, title="IPM P1")
 		self.set_default_size(700, 500)
+		
+		# get collections from database
 		self.workouts = db.workouts
 		self.exercises = db.exercises
 		
-		self.grid = Gtk.Grid()
-		self.grid.set_column_homogeneous(True)
-		self.grid.set_row_spacing(20)
+		self.wk_grid = Gtk.Grid()
+		self.wk_grid.set_column_homogeneous(True)
+		self.wk_grid.set_row_spacing(20)
+		
 		self.scrolled_window = Gtk.ScrolledWindow()
 		self.scrolled_window.set_border_width(10)
 		self.add(self.scrolled_window)
-		self.scrolled_window.add(self.grid)
+		self.scrolled_window.add(self.wk_grid)
 
-		self.routine_list = []
+		self.all_workouts = []
 		self.all_exercises = []
 
-		for ex_db in self.exercises.find():
-			exercise = Exercise(ex_db['_id'], ex_db['description'], ex_db['image'], ex_db['name'], ex_db['video'])
+		# make objects from all exercises in database
+		for exercise_db in self.exercises.find():
+			exercise = Exercise(exercise_db['_id'], exercise_db['description'], exercise_db['image'], exercise_db['name'], exercise_db['video'])
 			self.all_exercises.append(exercise)
 
-		for index, post in enumerate(self.workouts.find()):
-			routine = Routine(post['_id'], post['name'], post['description'], post['image'])
-			exercises_of_routine = []
-			for routine_ex in post['exercises']:
+		# make objects from all workouts in database
+		for index, workout_db in enumerate(self.workouts.find()):
+			workout = Workout(workout_db['_id'], workout_db['name'], workout_db['description'], workout_db['image'])
+			# attach proper exercises to the workout
+			exercises_of_workout = []
+			found_exercise_in_db = False
+			for workout_ex in workout_db['exercises']:
 				for exercise in self.all_exercises:
-					if routine_ex[0] == exercise.name:
-						ex_of_routine = ExerciseToRoutine(routine.id, exercise.id, routine_ex[1])
-						exercises_of_routine.append(ex_of_routine)	
-			routine.set_exercises(exercises_of_routine)
-			self.routine_list.append(routine)
-		self.get_workouts()
+					if workout_ex[0] == exercise.name:
+						found_exercise_in_db = True
+						ex_of_workout = ExerciseToWorkout(workout.id, exercise.id, workout_ex[1])
 
-		
+				# if the exercise given with workout is not in the exercises colllection in database
+				if found_exercise_in_db is False:
+					id_ = random.randint(1, 10000000)
+					exercise = Exercise(id_, None, None, workout_ex[0], None)
+					self.all_exercises.append(exercise)
+					ex_of_workout = ExerciseToWorkout(workout.id, exercise.id, workout_ex[1])
 
-	def add_to_grid(self, routine, img, column, row):
-		
+				exercises_of_workout.append(ex_of_workout)
+
+			# add list of exercises to the routine for faster displaying
+			workout.set_exercises(exercises_of_workout)
+			self.all_workouts.append(workout)
+
+		self.make_workouts_grid()
+
+
+	def make_workouts_grid(self):
+		while(self.wk_grid.get_child_at(0,0)!=None):
+			self.wk_grid.remove_column(0)
+		i = 0
+                current_item_index = 0
+                while i < len(self.all_workouts):
+			# 3 workouts in a row
+                        for j in range(3):
+				if current_item_index <= len(self.all_workouts)-1:
+                                	workout = self.all_workouts[current_item_index]
+
+					img = self.get_image(workout)
+					self.add_workout_to_grid(workout, img, j, i/3)
+
+	                                current_item_index = current_item_index + 1
+                        i = i + 3
+
+		self.queue_draw()
+		self.show_all()
+
+
+	def add_workout_to_grid(self, workout, img, column, row):
 		cell_grid = Gtk.Grid()
-                name = Gtk.Label(label=routine.name)
+                name = Gtk.Label()
+		name.set_markup("<b>{}</b>".format(workout.name))
                 frame = Gtk.Frame()
                 frame.add(name)	
+		cell_grid.attach(frame, 0, 0, 2, 1)
+		last_row = 1
+		try:
+			for index, text in enumerate(workout.description):
+				description = Gtk.Label(label=text+ "                      ")
+				description.set_line_wrap(True)
+				description.set_size_request(75, 1)
+				frame_d = Gtk.Frame()
+				frame_d.add(description)
+				cell_grid.attach(frame_d, 0, index+2, 2, 1)
+				last_row = index+2
+		except:
+			pass
 
-		description = Gtk.Label(label=routine.description[0])
-		description.set_line_wrap(True)
-		description.set_size_request(75, 1)
-		frame_d = Gtk.Frame()
-		frame_d.add(description)
-		
-			
 		if img is not None:
-			cell_grid.attach(img, 0, 0, 2, 1)
-		cell_grid.attach(frame, 0, 1, 2, 1)
-		cell_grid.attach(frame_d, 0, 2, 2, 1)
-
+			cell_grid.attach(img, 0, 1, 2, 1)
+		
 		btn_show = Gtk.Button(label='Show')
-                btn_show.connect("clicked", self.routine_details, routine)
-                cell_grid.attach(btn_show, 0, 3, 1, 1)
+                btn_show.connect("clicked", self.show_exercises, workout)
+                cell_grid.attach(btn_show, 0, last_row+1, 1, 1)
 
    		btn_delete = Gtk.Button(label='Delete')
-                btn_delete.connect("clicked", self.delete_routine, routine, self.workouts)
-                cell_grid.attach(btn_delete, 1, 3, 1, 1)
-		colorh="#FF0000"        
+                btn_delete.connect("clicked", self.deletion_message, 1, workout, self.workouts)
+                cell_grid.attach(btn_delete, 1, last_row+1, 1, 1)
+
+		colorh="#FF3333"        
 		color=Gdk.RGBA()
 		color.parse(colorh)
 		color.to_string()
 		btn_delete.override_background_color(Gtk.StateFlags.NORMAL, color)
 
-		self.grid.attach(cell_grid, column, row, 1, 1)
+		self.wk_grid.attach(cell_grid, column, row, 1, 1)
+	
 
-
-	def get_workouts(self):
-		while(self.grid.get_child_at(0,0)!=None):
-			self.grid.remove_column(0)
-		i = 0
-                current_item_index = 0
-                while i < len(self.routine_list):
-                        for j in range(3):
-				if current_item_index <= len(self.routine_list)-1:
-                                	routine = self.routine_list[current_item_index]
-					img = self.get_image(routine)
-					self.add_to_grid(routine, img, j, i/3)
-	                                current_item_index = current_item_index + 1
-                        i = i + 3
-		self.queue_draw()
-		self.show_all()
-
-
-	def get_image(self, routine):
-		img = None
-		path = self.get_image_path(routine.image_string, routine.id)
-	        try:
-			pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 200, 200, True)
-                        img = Gtk.Image.new_from_pixbuf(pixbuf)
-                                        
-                except GLib.Error as err:
-                       	pass
-		return img
-
-	def delete_routine(self, widget, *data):
-		messagedialog = Gtk.MessageDialog(parent=self,
-						flags=Gtk.DialogFlags.MODAL,
-						type=Gtk.MessageType.WARNING,
-						buttons=Gtk.ButtonsType.OK_CANCEL,
-						message_format="Are you sure you want to delete this object?")
-        	messagedialog.connect("response", self.dialog_response, data)
-        	messagedialog.show()
-
-	def dialog_response(self, widget, response_id, *data):
+	def confirm_workout_deletion(self, widget, response_id, *data):
         	if response_id == Gtk.ResponseType.OK:
-            		routine = {"_id": data[0][0].id}
-			self.routine_list.remove(data[0][0])
+            		routine = {"_id": data[0][1].id}
+			self.all_workouts.remove(data[0][1])
 			#self.workouts.delete_one(routine)
-			self.get_workouts()
+
+			self.make_workouts_grid()
+
+			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
+        		dialog.format_secondary_text("The object has been deleted.")
+        		dialog.run()
+        		dialog.destroy()
+
+        	elif response_id == Gtk.ResponseType.CANCEL:
+        		pass
+
+		widget.destroy()
+
+	def show_exercises(self, widget, *data):
+		# make exercise window
+		self.ex_window = Gtk.Window()
+		self.ex_window.set_size_request(350, 500)
+		title = "{}".format(data[0].name)
+		self.ex_window.set_title(title)
+		self.ex_window.show()
+
+		# prepare grid with exercises
+		self.ex_grid = Gtk.Grid()
+		self.ex_grid.set_column_homogeneous(True)
+		self.ex_grid.set_row_spacing(20)
+
+		# make window scrollable
+		scrolled_window = Gtk.ScrolledWindow()
+		scrolled_window.set_border_width(10)
+		self.ex_window.add(scrolled_window)
+		scrolled_window.add(self.ex_grid)
+		self.exercise_list = data[0].get_exercises()
+		self.make_exercises_grid()
+
+
+	def make_exercises_grid(self):
+		# remove exercises from the view
+		while(self.ex_grid.get_child_at(0,0)!=None):
+			self.ex_grid.remove_column(0)
+
+		# add exercises to the view from self.exercise_list
+		i = 0
+                while i < len(self.exercise_list):
+			for ex in self.all_exercises:
+				if ex.id == self.exercise_list[i].exercise_id:                                 						self.add_exercise_to_grid(self.exercise_list[i], ex, i)
+			i = i + 1
+		# refresh view
+		self.ex_window.show_all()
+			
+
+	def add_exercise_to_grid(self, exercise_to_routine, exercise, row):
+		# prepare grid in given cell
+		cell_grid = Gtk.Grid()
+		
+		number = Gtk.Label(label=row+1)                
+		frame_number = Gtk.Frame()
+		frame_number.add(number)
+		cell_grid.attach(frame_number, 0, 0, 1, 1)
+
+		name = Gtk.Label(label="                     "+exercise.name+"                     ")
+                frame_name = Gtk.Frame()
+                frame_name.add(name)
+		cell_grid.attach(frame_name, 0, 1, 1, 1)
+
+		image = self.get_image(exercise)
+		if image is not None:
+			cell_grid.attach(image, 0, 2, 1, 1)
+
+		if exercise.video is not None:
+			btn_video = Gtk.Button(label='Link to video')
+			btn_video.connect("clicked", self.open_video, exercise.video)
+			cell_grid.attach(btn_video, 0, 3, 1, 1)
+
+		# in case there is no description
+		last_row = 3
+		try:
+			for index, text in enumerate(exercise.description):
+				description = Gtk.Label(label=text+ "                      ")
+				description.set_line_wrap(True)
+				description.set_size_request(75, 1)
+				frame_d = Gtk.Frame()
+				frame_d.add(description)
+				cell_grid.attach(frame_d, 0, index+4, 1, 1)
+				last_row = index+4
+		except:
+			pass	
+
+   		btn_delete = Gtk.Button(label='Delete')
+                btn_delete.connect("clicked", self.deletion_message, 0, exercise_to_routine, self.workouts)
+                cell_grid.attach(btn_delete, 0, last_row+1, 1, 1)
+
+		colorh="#FF3333"        
+		color=Gdk.RGBA()
+		color.parse(colorh)
+		color.to_string()
+		btn_delete.override_background_color(Gtk.StateFlags.NORMAL, color)
+
+		# attach cell grid to grid with exercises
+		self.ex_grid.attach(cell_grid, 0, row, 1, 1)
+
+
+	def open_video(self, widget, *data):
+		webbrowser.open(data[0], new=0, autoraise=True)
+
+
+	def confirm_exercise_deletion(self, widget, response_id, *data):
+        	if response_id == Gtk.ResponseType.OK:
+			self.exercise_list.remove(data[0][1])
+		
+			# delete from database
+			#self.exercises.delete_one(exercise)
+
+			# refresh grid with exercises after deletion
+			self.make_exercises_grid()
 			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
         		dialog.format_secondary_text("The object has been deleted.")
         		dialog.run()
@@ -218,12 +259,42 @@ class MyWindow(Gtk.Window):
         	elif response_id == Gtk.ResponseType.CANCEL:
         		pass
 		widget.destroy()
+
+
+	def deletion_message(self, widget, *data):
+		messagedialog = Gtk.MessageDialog(parent=self,
+						flags=Gtk.DialogFlags.MODAL,
+						type=Gtk.MessageType.WARNING,
+						buttons=Gtk.ButtonsType.OK_CANCEL,
+						message_format="Are you sure you want to delete this object?")
+		if data[0] == 0:
+        		messagedialog.connect("response", self.confirm_exercise_deletion, data)
+		else:
+			messagedialog.connect("response", self.confirm_workout_deletion, data)
+        	messagedialog.show()
+
+
+	def get_image(self, object_):
+		if object_.image_string is None:
+			return None
+
+		image = None
+		path = self.get_image_path(object_.image_string, object_.id)
+	        try:
+			pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, 200, 200, True)
+                        image = Gtk.Image.new_from_pixbuf(pixbuf)
+                                        
+                except GLib.Error as err:
+                       	pass
+		return image
+
 
 	def get_image_path(self, img_string, object_id):
 		path = '/home/karolina/ipm1920-p1/img/{}.jpeg'.format(object_id)
 		with open(path, 'wb') as file:
 			file.write(img_string.decode('base64'))
 		return path
+
 
 win = MyWindow()
 win.connect("destroy", Gtk.main_quit)
