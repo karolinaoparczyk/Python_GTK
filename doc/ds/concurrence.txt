@@ -1,0 +1,21 @@
+@startuml
+actor User
+control DeleteButton
+control QuestionBox
+control DeleteMethod
+database Fitness
+entity Workout
+control MessageBox
+
+User -> DeleteButton : clicks
+DeleteButton -> QuestionBox : shows
+QuestionBox -> User : asks for confirmation
+User -> QuestionBox : confirms
+QuestionBox -> DeleteMethod : gives information
+DeleteMethod -> Fitness : demands deletion
+Fitness -> Workout : delete
+Fitness -> DeleteMethod : confirms deletion
+DeleteMethod -> MessageBox : gives information
+MessageBox -> User : confirms deletion
+
+@enduml
