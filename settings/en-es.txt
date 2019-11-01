@@ -1,0 +1,1 @@
+{"Delete": "Eliminar", "Show": "Mostrar", "Operation succedeed": "Operación exitosa", "The object has been deleted.": "El objeto ha sido eliminado", "Link to video": "Enlace al video", "Are you sure you want to delete this object?": "¿Seguro que quieres eliminar este objeto? "}
