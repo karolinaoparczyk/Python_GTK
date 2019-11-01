@@ -1,25 +1,36 @@
 @startuml
-Routine "1" o-- "many"  Exercise
+Workout "1" o-- "many"  ExerciseToWorkout 
+Exercise "1" o-- "many" ExerciseToWorkout
 
-class Routine {
+class Workout {
+	-String id
 	-String description
-	-String image
+	-String image_string
 	-String name
-	+void delete()
+	-List exercises
 	+string get_description()
-	+string get_image()
+	+List get_exercises()
+	+string get_image_string()
 	+string get_name()
+	+List set_exercises()
 }
 
 class Exercise {
+	-String id
 	-String description
-	-String image
-	-Integer length
+	-String image_string
 	-String name
-	+void delete()
+	-String video_url
 	+string get_description()
-	+string get_image()
-	+int get_length()
+	+string get_image_string()
 	+string get_name()
+	+string get_video_url()
+}
+
+class ExerciseToWorkout {
+	-String exercise_id
+	-String routine_id
+	-String length
+	+String get_length()
 }
 @enduml

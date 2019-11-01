@@ -15,15 +15,19 @@ note right of Window2
 end note
 
 database "MongoDB"{
-	frame "Routine" {
-		[Contains exercises] as R
+	frame "Workout" {
+		[Contains exercises] as W
 	}
 	frame "Exercise"{
-		[Attached to routine] as E
+		[Has description] as E
+	}
+	frame "ExerciseToWorkout"{
+		[Binds exercise to workout] as EW
 	}
 }
 
-[Widgets] --- R
+[Widgets] --- W
 [Widgets] --- E
+[Widgets] --- EW
 
 @enduml

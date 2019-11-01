@@ -2,13 +2,13 @@
 actor User
 control ShowButton
 control DeleteButton
-entity Routine
+entity Workout
 entity Exercise
 database Fitness
 
 User -> ShowButton : click
 User -> DeleteButton : click
-User -> Routine : view and delete
+User -> Workout : view and delete
 User -> Exercise : view and delete
 ShowButton -> Fitness : get items
 DeleteButton -> Fitness : delete items
