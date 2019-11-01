@@ -2,7 +2,7 @@ import gi
 import os
 import re
 import random
-import time
+import json
 import webbrowser
 from pymongo import MongoClient
 
@@ -10,6 +10,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib, Gdk, GObject
 
 from models import Workout, Exercise, ExerciseToWorkout
+
+import locale
 
 
 client = MongoClient('localhost', 27017)
@@ -20,6 +22,13 @@ class MyWindow(Gtk.Window):
 
 
 	def __init__(self):
+		if locale.getdefaultlocale()[0] == "en_US":
+			language = "en"
+			self.get_en_translation()
+		else:
+			language = "es"
+			self.get_es_translation()
+
                 Gtk.Window.__init__(self, title="IPM P1")
 		self.set_default_size(700, 500)
 		
@@ -116,11 +125,11 @@ class MyWindow(Gtk.Window):
 		if img is not None:
 			cell_grid.attach(img, 0, 1, 2, 1)
 		
-		btn_show = Gtk.Button(label='Show')
+		btn_show = Gtk.Button(label=self.show_btn_name)
                 btn_show.connect("clicked", self.show_exercises, workout)
                 cell_grid.attach(btn_show, 0, last_row+1, 1, 1)
 
-   		btn_delete = Gtk.Button(label='Delete')
+   		btn_delete = Gtk.Button(label=self.delete_btn_name)
                 btn_delete.connect("clicked", self.deletion_message, 1, workout, self.workouts)
                 cell_grid.attach(btn_delete, 1, last_row+1, 1, 1)
 
@@ -141,8 +150,8 @@ class MyWindow(Gtk.Window):
 
 			self.make_workouts_grid()
 
-			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
-        		dialog.format_secondary_text("The object has been deleted.")
+			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, self.operation_succedeed_name)
+        		dialog.format_secondary_text(self.deletion_confirmation_name)
         		dialog.run()
         		dialog.destroy()
 
@@ -207,7 +216,7 @@ class MyWindow(Gtk.Window):
 			cell_grid.attach(image, 0, 2, 1, 1)
 
 		if exercise.video is not None:
-			btn_video = Gtk.Button(label='Link to video')
+			btn_video = Gtk.Button(label=self.link_to_video_name)
 			btn_video.connect("clicked", self.open_video, exercise.video)
 			cell_grid.attach(btn_video, 0, 3, 1, 1)
 
@@ -225,7 +234,7 @@ class MyWindow(Gtk.Window):
 		except:
 			pass	
 
-   		btn_delete = Gtk.Button(label='Delete')
+   		btn_delete = Gtk.Button(label=self.delete_btn_name)
                 btn_delete.connect("clicked", self.deletion_message, 0, exercise_to_routine, self.workouts)
                 cell_grid.attach(btn_delete, 0, last_row+1, 1, 1)
 
@@ -252,8 +261,8 @@ class MyWindow(Gtk.Window):
 
 			# refresh grid with exercises after deletion
 			self.make_exercises_grid()
-			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Operation succedeed")
-        		dialog.format_secondary_text("The object has been deleted.")
+			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, self.operation_succedeed_name)
+        		dialog.format_secondary_text(self.deletion_confirmation_name)
         		dialog.run()
         		dialog.destroy()
         	elif response_id == Gtk.ResponseType.CANCEL:
@@ -266,7 +275,7 @@ class MyWindow(Gtk.Window):
 						flags=Gtk.DialogFlags.MODAL,
 						type=Gtk.MessageType.WARNING,
 						buttons=Gtk.ButtonsType.OK_CANCEL,
-						message_format="Are you sure you want to delete this object?")
+						message_format=self.deletion_question_name)
 		if data[0] == 0:
         		messagedialog.connect("response", self.confirm_exercise_deletion, data)
 		else:
@@ -290,10 +299,31 @@ class MyWindow(Gtk.Window):
 
 
 	def get_image_path(self, img_string, object_id):
-		path = '/home/karolina/ipm1920-p1/img/{}.jpeg'.format(object_id)
-		with open(path, 'wb') as file:
-			file.write(img_string.decode('base64'))
+		current_directory = os.path.dirname(os.path.realpath(__file__))
+		path = current_directory + '/img/{}.jpeg'.format(object_id)
+		with open(path, 'wb') as file_:
+			file_.write(img_string.decode('base64'))
 		return path
+
+	def get_es_translation(self):
+		current_directory = os.path.dirname(os.path.realpath(__file__))
+		with open(current_directory + '/settings/en-es.txt', 'r') as file_:
+			data = json.load(file_)
+			self.delete_btn_name = data['Delete']
+			self.show_btn_name = data['Show']
+			self.operation_succedeed_name = data['Operation succedeed']
+			self.deletion_confirmation_name = data['The object has been deleted.']
+			self.link_to_video_name = data['Link to video']
+			self.deletion_question_name = data['Are you sure you want to delete this object?']
+
+
+	def get_en_translation(self):
+		self.delete_btn_name = 'Delete'
+		self.show_btn_name = 'Show'
+		self.operation_succedeed_name = 'Operation succedded'
+		self.deletion_confirmation_name = 'The object has been deleted.'
+		self.link_to_video_name = 'Link to video'
+		self.deletion_question_name = 'Are you sure you want to delete this object?'
 
 
 win = MyWindow()
