@@ -83,15 +83,16 @@ class Message:
     def _process_response_json_content(self):
         content = self.response
         result = content.get("result")
-        #print(f"got result: {result}")
+#        print(f"got result: {result}")
 
     def _process_response_binary_content(self):
         content = self.response
-        print(f"got response: {repr(content)}")
+#        print(f"got response: {repr(content)}")
 
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
-            return self.read()
+            result = self.read()
+            return result
         if mask & selectors.EVENT_WRITE:
             self.write()
 
@@ -107,7 +108,8 @@ class Message:
 
         if self.jsonheader:
             if self.response is None:
-                return self.process_response()
+                result = self.process_response()
+                return result
 
     def write(self):
         if not self._request_queued:

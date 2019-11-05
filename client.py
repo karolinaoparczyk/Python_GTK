@@ -38,6 +38,7 @@ def start_connection(host, port, request):
 def define_connection(action, value):
 	host, port = '127.0.0.1', 65432
 	request = create_request(action, value)
+	print(request)
 	start_connection(host, port, request)
 	try:
 		while True:

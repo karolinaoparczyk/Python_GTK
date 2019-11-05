@@ -7,11 +7,7 @@ import os
 import base64
 from pymongo import MongoClient
 from pathlib import Path
-
-client = MongoClient('localhost', 27017)
-db = client.fitness
-workouts = db.workouts
-exercises = db.exercises
+from bson import ObjectId
 
 
 def get_image_path(img_string, object_id):
@@ -21,32 +17,32 @@ def get_image_path(img_string, object_id):
 		return file_.name
 
 
-workouts_json = dict()
-for document in workouts.find():
-	document['_id'] = str(document['_id'])
-	if document['image'] is not None:
-		document['image'] = get_image_path(document['image'], document['_id'])
-	if "workouts" in workouts_json:
-		workouts_json["workouts"].append(document)
-	else:
-		workouts_json["workouts"] = [document]
+def get_workouts_json(db):
+    workouts = db.workouts
+    workouts_json = dict()
+    for document in workouts.find():
+        document['_id'] = str(document['_id'])
+        if document['image'] is not None:
+            document['image'] = get_image_path(document['image'], document['_id'])
+        if "workouts" in workouts_json:
+            workouts_json["workouts"].append(document)
+        else:
+            workouts_json["workouts"] = [document]
+    return workouts_json
 
 
-exercises_json = dict()
-for document in exercises.find():
-	document['_id'] = str(document['_id'])
-	if document['image'] is not None:
-		document['image'] = get_image_path(document['image'], document['_id'])
-	if "exercises" in exercises_json:
-		exercises_json["exercises"].append(document)
-	else:
-		exercises_json["exercises"] = [document]
-
-
-request_search = {
-    "workouts": workouts_json,
-    "exercises": exercises_json,
-}
+def get_exercises_json(db):
+    exercises = db.exercises
+    exercises_json = dict()
+    for document in exercises.find():
+        document['_id'] = str(document['_id'])
+        if document['image'] is not None:
+            document['image'] = get_image_path(document['image'], document['_id'])
+        if "exercises" in exercises_json:
+            exercises_json["exercises"].append(document)
+        else:
+            exercises_json["exercises"] = [document]
+    return exercises_json
 
 
 class Message:
@@ -126,10 +122,34 @@ class Message:
         return message
 
     def _create_response_json_content(self):
+        client = MongoClient('localhost', 27017)
+        db = client.fitness
+        workouts_json = get_workouts_json(db)
+        exercises_json = get_exercises_json(db)
+        request_search = {
+        "workouts": workouts_json,
+        "exercises": exercises_json,
+        }
         action = self.request.get("action")
+        answer = None
         if action == "search":
             query = self.request.get("value")
             answer = request_search.get(query) or f'No match for "{query}".'
+            content = {"result": answer}
+        elif action == "delete":
+            query = self.request.get("value")
+            if query[0] == "workout":
+                try:
+                    db.workouts.delete_one({"_id": ObjectId(query[1])})
+                    answer = "OK"
+                except e:
+                    answer = "Error occured: {}".format(e)
+            elif query[0] == "exercise":
+                try:
+                    db.exercises.delete_one({"_id": ObjectId(query[1])})
+                    answer = "OK"
+                except:
+                    answer = "Error occured"
             content = {"result": answer}
         else:
             content = {"result": f'Error: invalid action "{action}".'}
@@ -142,7 +162,7 @@ class Message:
                  "content_encoding": content_encoding,
             }
         except:
-            print(content)
+            pass
         return response
 
     def _create_response_binary_content(self):

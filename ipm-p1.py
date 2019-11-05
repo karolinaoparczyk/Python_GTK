@@ -36,11 +36,7 @@ class MyWindow(Gtk.Window):
 		
 		# get collections from database
 		self.workouts = define_connection('search', 'workouts')
-		self.workouts = self.workouts.replace("'",'"')
-		self.workouts = self.workouts.replace('""','min"')
-		self.workouts = self.workouts.replace('l"',"l'")
-		self.workouts = json.loads(self.workouts)
-		self.workouts = self.workouts['result']['workouts']		
+		self.render_workouts()	
 		
 		self.wk_grid = Gtk.Grid()
 		self.wk_grid.set_column_homogeneous(True)
@@ -48,29 +44,20 @@ class MyWindow(Gtk.Window):
 		self.wk_grid.set_column_spacing(20)
 		
 		self.scrolled_window = Gtk.ScrolledWindow()
-
 		self.scrolled_window.set_border_width(10)
 		self.add(self.scrolled_window)
 		self.scrolled_window.add(self.wk_grid)
 
-		self.all_workouts = []
-
 		self.exercises = define_connection('search', 'exercises')
-		close()
-		self.exercises = self.exercises.replace("'",'"')
-		self.exercises = self.exercises.replace('they"re',"they're")
-		self.exercises = self.exercises.replace('That"s',"That's")
-		self.exercises = self.exercises.replace('arm"s',"arm's")
-		self.exercises = json.loads(self.exercises)
-		self.exercises = self.exercises['result']['exercises']		
+		self.render_exercises()
 
 		self.all_exercises = []
-
 		# make objects from all exercises in database
 		for exercise_db in self.exercises:
 			exercise = Exercise(exercise_db['_id'], exercise_db['description'], exercise_db['image'], exercise_db['name'], exercise_db['video'])
 			self.all_exercises.append(exercise)
 
+		self.all_workouts = []
 		# make objects from all workouts in database
 		for index, workout_db in enumerate(self.workouts):
 			workout = Workout(workout_db['_id'], workout_db['name'], workout_db['description'], workout_db['image'])
@@ -99,6 +86,23 @@ class MyWindow(Gtk.Window):
 			self.all_workouts.append(workout)
 
 		self.make_workouts_grid()
+
+
+	def render_workouts(self):
+		self.workouts = self.workouts.replace("'",'"')
+		self.workouts = self.workouts.replace('""','min"')
+		self.workouts = self.workouts.replace('l"',"l'")
+		self.workouts = json.loads(self.workouts)
+		self.workouts = self.workouts['result']['workouts']
+
+	
+	def render_exercises(self):
+		self.exercises = self.exercises.replace("'",'"')
+		self.exercises = self.exercises.replace('they"re',"they're")
+		self.exercises = self.exercises.replace('That"s',"That's")
+		self.exercises = self.exercises.replace('arm"s',"arm's")
+		self.exercises = json.loads(self.exercises)
+		self.exercises = self.exercises['result']['exercises']		
 
 
 	def make_workouts_grid(self):
@@ -184,21 +188,29 @@ class MyWindow(Gtk.Window):
 
 	def confirm_workout_deletion(self, widget, response_id, *data):
 		if response_id == Gtk.ResponseType.OK:
-			routine = {"_id": data[0][1].id}
-			self.all_workouts.remove(data[0][1])
-			#self.workouts.delete_one(routine)
-
-			self.make_workouts_grid()
-
-			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, self.operation_succedeed_name)
-			dialog.format_secondary_text(self.deletion_confirmation_name)
-			dialog.run()
-			dialog.destroy()
-
+			result = define_connection("delete", ("workout", data[0][1].id))
+			try:
+				self.all_workouts.remove(data[0][1])
+				self.make_workouts_grid()
+				self.create_info_message_dialog(self.operation_succeded_name, self.deletion_confirmation_name)
+			except:
+				self.create_info_message_dialog(self.error_occured_name, self.deletion_error_name)
 		elif response_id == Gtk.ResponseType.CANCEL:
         		pass
 
 		widget.destroy()
+	
+
+	def create_info_message_dialog(self, text, secondary_text):
+		dialog = Gtk.MessageDialog(parent=self,
+					modal=True,
+					message_type=Gtk.MessageType.INFO,
+					buttons=Gtk.ButtonsType.OK,
+					text=text)
+		dialog.format_secondary_text(secondary_text)
+		dialog.run()
+		dialog.destroy()
+
 
 	def show_exercises(self, widget, *data):
 		# make exercise window
@@ -311,17 +323,17 @@ class MyWindow(Gtk.Window):
 
 	def confirm_exercise_deletion(self, widget, response_id, *data):
 		if response_id == Gtk.ResponseType.OK:
-			self.exercise_list.remove(data[0][1])
-		
-			# delete from database
-			#self.exercises.delete_one(exercise)
+			result = define_connection("delete", ("exercise", data[0][1].exercise_id))
+			result = result.replace("'",'"')
+			result = json.loads(result)
+			print(result)
+			if result['result'] == "OK":
+				self.exercise_list.remove(data[0][1])
+				self.make_exercises_grid()
+				self.create_info_message_dialog(self.operation_succeded_name, self.deletion_confirmation_name)
+			else:
+				self.create_info_message_dialog(self.error_occured_name, self.deletion_error_name)
 
-			# refresh grid with exercises after deletion
-			self.make_exercises_grid()
-			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, self.operation_succedeed_name)
-			dialog.format_secondary_text(self.deletion_confirmation_name)
-			dialog.run()
-			dialog.destroy()
 		elif response_id == Gtk.ResponseType.CANCEL:
         		pass
 		widget.destroy()
@@ -329,10 +341,10 @@ class MyWindow(Gtk.Window):
 
 	def deletion_message(self, widget, *data):
 		messagedialog = Gtk.MessageDialog(parent=self,
-						flags=Gtk.DialogFlags.MODAL,
-						type=Gtk.MessageType.WARNING,
+						modal=True,
+						message_type=Gtk.MessageType.WARNING,
 						buttons=Gtk.ButtonsType.OK_CANCEL,
-						message_format=self.deletion_question_name)
+						text=self.deletion_question_name)
 		if data[0] == 0:
         		messagedialog.connect("response", self.confirm_exercise_deletion, data)
 		else:
@@ -362,19 +374,23 @@ class MyWindow(Gtk.Window):
 			data = json.load(file_)
 			self.delete_btn_name = data['Delete']
 			self.show_btn_name = data['Show']
-			self.operation_succedeed_name = data['Operation succedeed']
+			self.operation_succeded_name = data['Operation succedeed']
 			self.deletion_confirmation_name = data['The object has been deleted.']
 			self.link_to_video_name = data['Link to video']
 			self.deletion_question_name = data['Are you sure you want to delete this object?']
+			self.error_occured_name = data['Error occured']
+			self.deletion_error_name = data['The object has not been deleted. Contact your administrator.']
 
 
 	def get_en_translation(self):
 		self.delete_btn_name = 'Delete'
 		self.show_btn_name = 'Show'
-		self.operation_succedeed_name = 'Operation succedded'
+		self.operation_succeded_name = 'Operation succedded'
 		self.deletion_confirmation_name = 'The object has been deleted.'
 		self.link_to_video_name = 'Link to video'
 		self.deletion_question_name = 'Are you sure you want to delete this object?'
+		self.error_occured_name = 'Error occured'
+		self.deletion_error_name = 'The object has not been deleted. Contact your administrator.'
 
 
 win = MyWindow()
