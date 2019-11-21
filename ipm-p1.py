@@ -336,7 +336,7 @@ class MyWindow(Gtk.Window):
 		cell_grid.attach(scrolled_window, 0, 5, 2, 1)
 		
 		btn_delete = Gtk.Button(label=self.delete_btn_name)
-		btn_delete.connect("clicked", self.deletion_message, 0, exercise_to_routine, self.workouts)
+		btn_delete.connect("clicked", self.deletion_message, 0, exercise_to_routine, workout)
 		cell_grid.attach(btn_delete, 0, 6, 2, 1)
 
 		colorh="#FF3333"        
@@ -355,10 +355,6 @@ class MyWindow(Gtk.Window):
 	
 	def change_exercise_position(self, widget, *data):
 		exercises = data[2].exercises
-		for ex in exercises:
-			print(ex.no)
-			print(ex.exercise_id)
-			print(ex.routine_id)
 		exercises_in_new_order = []
 		if data[0] == 0:
 			for ex in exercises:
@@ -384,10 +380,6 @@ class MyWindow(Gtk.Window):
 					exercises_in_new_order.append(ex)
 
 		data[2].set_exercises(exercises_in_new_order)
-		for ex in data[2].exercises:
-			print(ex.no)
-			print(ex.exercise_id)
-			print(ex.routine_id)
 		self.make_exercises_grid(data[2])
 
 
@@ -397,8 +389,8 @@ class MyWindow(Gtk.Window):
 			result = result.replace("'",'"')
 			result = json.loads(result)
 			if result['result'] == "OK":
-				self.exercise_list.remove(data[0][1])
-				self.make_exercises_grid()
+				data[0][2].exercises.remove(data[0][1])
+				self.make_exercises_grid(data[0][2])
 				self.create_info_message_dialog(self.operation_succeded_name, self.deletion_confirmation_name)
 			else:
 				self.create_info_message_dialog(self.error_occured_name, self.deletion_error_name)
