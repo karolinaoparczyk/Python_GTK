@@ -36,13 +36,22 @@ def get_exercises_json(db):
     exercises_json = dict()
     for document in exercises.find():
         document['_id'] = str(document['_id'])
-        if document['image'] is not None:
-            document['image'] = get_image_path(document['image'], document['_id'])
+        try:
+            if document['image'] is not None:
+                document['image'] = get_image_path(document['image'], document['_id'])
+        except:
+            pass
         if "exercises" in exercises_json:
             exercises_json["exercises"].append(document)
         else:
             exercises_json["exercises"] = [document]
     return exercises_json
+
+
+def get_exercises_of_workout(db, workout_id):
+    exercises = db.exercises_to_workout.find({'routine_id': workout_id})
+    print(exercises)
+    return exercises
 
 
 class Message:
@@ -123,21 +132,21 @@ class Message:
 
     def _create_response_json_content(self):
         client = MongoClient('localhost', 27017)
-        db = client.fitness
+        db = client.fitness_test
         workouts_json = get_workouts_json(db)
-        exercises_json = get_exercises_json(db)
-        request_search = {
-        "workouts": workouts_json,
-        "exercises": exercises_json,
-        }
         action = self.request.get("action")
         answer = None
-        if action == "search":
-            query = self.request.get("value")
-            answer = request_search.get(query) or f'No match for "{query}".'
+        query = self.request.get("value")
+        if action == "search_exercises_to_workout_entities":
+            answer = get_exercises_of_workout(db, query)
+            content = {"result": answer}
+        elif action == "search_workouts":
+            answer = get_workouts_json(db)
+            content = {"result": answer}
+        elif action == "search_exercises":
+            answer = get_exercises_json(db)
             content = {"result": answer}
         elif action == "delete":
-            query = self.request.get("value")
             if query[0] == "workout":
                 try:
                     db.workouts.delete_one({"_id": ObjectId(query[1])})
@@ -146,10 +155,33 @@ class Message:
                     answer = "Error occured: {}".format(e)
             elif query[0] == "exercise":
                 try:
-                    db.exercises.delete_one({"_id": ObjectId(query[1])})
+                    result = db.exercises.delete_one({"_id": ObjectId(query[1])})
                     answer = "OK"
                 except:
                     answer = "Error occured"
+            content = {"result": answer}
+        elif action == "insert_ex" or action == "insert_ex_to_wk":
+            query = query.replace("'","")
+            query = query[1:-1]
+            query = query.split("}, {")
+            for q in query:
+                if q[-1:] != "}":
+                    q = q + "}"
+                if q[0] != "{":
+                    q = "{" + q
+                q = json.loads(q)
+                
+                if q:
+                    if action == "insert_ex":
+                        db.exercises.insert_one(q)
+                    elif action == "insert_ex_to_wk":
+                        ex_to_wk = db.exercises_to_workout
+                        db.exercises_to_workout.insert_one(q)
+                        answer = "OK"
+                else:
+                        answer = "Error occured"
+	     
+		
             content = {"result": answer}
         else:
             content = {"result": f'Error: invalid action "{action}".'}
@@ -256,14 +288,14 @@ class Message:
         if self.jsonheader["content-type"] == "text/json":
             encoding = self.jsonheader["content-encoding"]
             self.request = self._json_decode(data, encoding)
-            print("received request", repr(self.request), "from", self.addr)
+            #print("received request", repr(self.request), "from", self.addr)
         else:
             # Binary or unknown content-type
             self.request = data
-            print(
+            """print(
                 f'received {self.jsonheader["content-type"]} request from',
                 self.addr,
-            )
+            )"""
         # Set selector to listen for write events, we're done reading.
         self._set_selector_events_mask("w")
 

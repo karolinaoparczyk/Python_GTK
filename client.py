@@ -11,7 +11,7 @@ sel = selectors.DefaultSelector()
 
 
 def create_request(action, value):
-    if action == "search" or action == 'delete':
+    if action == "search_workouts" or action == "search_exercises" or action == "search_exercises_by_workout" or action == 'delete' or action == 'insert_ex' or action == 'insert_ex_to_wk':
         return dict(
             type="text/json",
             encoding="utf-8",
@@ -27,7 +27,7 @@ def create_request(action, value):
 
 def start_connection(host, port, request):
     addr = (host, port)
-    print("starting connection to", addr)
+    #print("starting connection to", addr)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setblocking(False)
     sock.connect_ex(addr)
@@ -38,7 +38,6 @@ def start_connection(host, port, request):
 def define_connection(action, value):
 	host, port = '127.0.0.1', 65432
 	request = create_request(action, value)
-	print(request)
 	start_connection(host, port, request)
 	try:
 		while True:

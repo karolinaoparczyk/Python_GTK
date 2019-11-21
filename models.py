@@ -1,16 +1,16 @@
 class Workout:
-	def __init__(self, id, name, description, image_string):
+	def __init__(self, id, name, description, image):
 		self.id = id
 		self.description = description
-		self.image_string = image_string
+		self.image = image
 		self.name = name			
 
 	
 	def get_description(self):
 		return self.description
 
-	def get_image_string(self):
-		return self.image_string
+	def get_image(self):
+		return self.image
 
 	def get_name(self):
 		return self.name
@@ -23,10 +23,10 @@ class Workout:
 
 
 class Exercise:
-	def __init__(self, id_, description, image_string, name, video):
+	def __init__(self, id_, description, image, name, video):
 		self.id = id_
 		self.description = description
-		self.image_string = image_string
+		self.image = image
 		self.name = name
 		self.video = video
 
@@ -34,8 +34,8 @@ class Exercise:
 	def get_description(self):
 		return self.description
 
-	def get_image_string(self):
-		return self.image_string
+	def get_image(self):
+		return self.image
 
 	def get_name(self):
 		return self.name
@@ -45,10 +45,14 @@ class Exercise:
 
 
 class ExerciseToWorkout:
-	def __init__(self, routine_id, exercise_id, length):
+	def __init__(self, routine_id, exercise_id, length, no):
 		self.exercise_id = exercise_id
 		self.routine_id = routine_id		
 		self.length = length
+		self.no = no
 
 	def get_length(self):
 		return self.lenght
+
+	def __copy__(self):
+       		return type(self)(self.routine_id, self.exercise_id, self.length, self.no)
