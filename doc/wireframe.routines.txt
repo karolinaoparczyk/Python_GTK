@@ -1,20 +1,20 @@
 @startsalt
 {^IPM P1
-..|..|..|..|..|..
-<&image>|*|<&image>|*|<&image>|*
-routine1|*|routine2|*|routine3|*
-Description|*|Description|*|Description
-[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete] 
-..|..|..|..|..|..
-<&image>|*|<&image>|*|<&image>|*
-routine4|*|routine5|*|routine6|*
-Description|*|Description|*|Description
-[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
-..|..|..|..|..|..
-<&image>|*|<&image>|*|<&image>|*
-routine7|*|routine8|*|routine9|*
-Description|*|Description|*|Description
-[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
-..|..|..|..|..|..
+..|..|..|..|..|..|..|..
+routine1|*|routine2|*|routine3|*|routine4
+<&image>|*|<&image>|*|<&image>|*|<&image>
+Description|*|Description|*|Description|*|Description
+[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
+..|..|..|..|..|..|..|..
+routine1|*|routine2|*|routine3|*|routine4
+<&image>|*|<&image>|*|<&image>|*|<&image>
+Description|*|Description|*|Description|*|Description
+[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
+..|..|..|..|..|..|..|..
+routine1|*|routine2|*|routine3|*|routine4
+<&image>|*|<&image>|*|<&image>|*|<&image>
+Description|*|Description|*|Description|*|Description
+[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]|[ show ]|[delete]
+..|..|..|..|..|..|..|..
 }
 @endsalt

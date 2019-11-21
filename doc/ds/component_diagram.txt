@@ -2,16 +2,32 @@
 () "GUI1" as Window1
 () "GUI2" as Window2
 
+node "Server-Client" {
+	[Server] -> [Client]
+	[Client] -> [Server]
+}
+
+note right of [Client]
+	requests server for
+	data necessary for the app
+end note
+
+note right of [Server]
+	gets data from database
+	and sends to client
+end note
+
 Window1 -- [Widgets]
 Window2 -- [Widgets]
 
 note left of [Widgets]
-	displaying and deleting
+	displays and orders to delete
 	routines and exercises
 end note
-note left of Window1 : displaying routines
+
+note left of Window1 : displays routines
 note right of Window2
-	displaying exercises
+	displays exercises
 end note
 
 database "MongoDB"{
@@ -19,15 +35,18 @@ database "MongoDB"{
 		[Contains exercises] as W
 	}
 	frame "Exercise"{
-		[Has description] as E
+		[Details of exercises] as E
 	}
 	frame "ExerciseToWorkout"{
 		[Binds exercise to workout] as EW
 	}
 }
 
-[Widgets] --- W
-[Widgets] --- E
-[Widgets] --- EW
+[Widgets] <---> [Client]
+[Widgets] <---> [Client]
+[Widgets] <---> [Client]
+[Server] <---> W
+[Server] <---> E
+[Server] <---> EW
 
 @enduml

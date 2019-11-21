@@ -31,6 +31,8 @@ class ExerciseToWorkout {
 	-String exercise_id
 	-String routine_id
 	-String length
+	-int no
 	+String get_length()
+	+String get_no()
 }
 @enduml

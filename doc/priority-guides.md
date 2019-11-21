@@ -7,3 +7,4 @@ To create this application we need:
 - a window displaying exercises of a chosen routine
 - text boxes and images attached to routines
 - buttons to delete exercises
+- buttons that will let reorder exercises

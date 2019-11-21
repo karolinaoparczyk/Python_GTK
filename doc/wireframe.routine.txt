@@ -1,30 +1,14 @@
 @startsalt
-{^Workout
+{^Workout 1
 ..
-"1                           "
-"exercise1                   " 
-<&image>
-"20 seconds                  "
-"Link to video               "
-"Description                 "
-[           delete           ]
-..
-"2                           "
-"exercise2                   "
-<&image>
-"20 seconds                  "
-"Link to video               "
-"Description                 "
-[           delete           ]
-..  
-"3                           "
-"exercise3                   "
-<&image>
-"20 seconds                  "
-"Link to video               "
-"Description                 "
-[           delete           ]
-..   
+"1                           "|*|"2                           "|*|"1                           "|*
+[  <- left   ]|[   right ->  ]|[   <- left   ]|[   right ->   ]|[  <- left   ]|[   right ->  ]
+"exercise1                   "|*|"exercise2                   "|*|"exercise1                   "|*
+<&image>|*|<&image>|*<&image>|*
+"20 seconds                  "|*|"20 seconds                  "|*|"20 seconds                  "|*
+"Link to video               "|*|"Link to video               "|*|"Link to video               "|*
+"Description                 "|*|"Description                 "|*|"Description                 "|*
+[           delete           ]|*|[           delete           ]|*|[           delete           ]|*
 }
 @endsalt
 

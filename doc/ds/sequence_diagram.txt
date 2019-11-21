@@ -2,14 +2,25 @@
 actor User
 control ShowButton
 control DeleteButton
+control Client
+control Server
+database Fitness
 entity Workout
 entity Exercise
-database Fitness
+entity ExerciseToWorkout
 
 User -> ShowButton : click
 User -> DeleteButton : click
-User -> Workout : view and delete
-User -> Exercise : view and delete
-ShowButton -> Fitness : get items
-DeleteButton -> Fitness : delete items
+ShowButton -> Client : request getting items
+DeleteButton -> Client : request deleting items
+Client -> Server : send get or delete message
+Server -> Fitness : request get or delete items
+Fitness -> Workout : get or delete items
+Fitness -> Exercise : get or delete items
+Fitness -> ExerciseToWorkout : get or delete items
+Server -> Client : give items or delete message
+Client -> ShowButton : give items
+Client -> DeleteButton : give delete message
+ShowButton -> User : show items
+DeleteButton -> User : show delete message
 @enduml

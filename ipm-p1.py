@@ -306,10 +306,16 @@ class MyWindow(Gtk.Window):
 			frame_err.add(error)
 			cell_grid.attach(frame_err, 0, 3, 2, 1)
 
+		length = Gtk.Label()
+		length.set_markup("<b>{}</b>".format(exercise_to_routine.length))   
+		frame_lenght = Gtk.Frame()
+		frame_lenght.add(length)
+		cell_grid.attach(frame_lenght, 0, 4, 2, 1)
+
 		if exercise.video is not None:
 			btn_video = Gtk.Button(label=self.link_to_video_name)
 			btn_video.connect("clicked", self.open_video, exercise.video)
-			cell_grid.attach(btn_video, 0, 4, 2, 1)
+			cell_grid.attach(btn_video, 0, 5, 2, 1)
 
 		description = ""
 		if exercise.description != "None":
@@ -333,11 +339,11 @@ class MyWindow(Gtk.Window):
 		scrolled_window.set_min_content_height(200)
 		scrolled_window.set_min_content_width(200)
 		scrolled_window.add(frame_d)
-		cell_grid.attach(scrolled_window, 0, 5, 2, 1)
+		cell_grid.attach(scrolled_window, 0, 6, 2, 1)
 		
 		btn_delete = Gtk.Button(label=self.delete_btn_name)
 		btn_delete.connect("clicked", self.deletion_message, 0, exercise_to_routine, workout)
-		cell_grid.attach(btn_delete, 0, 6, 2, 1)
+		cell_grid.attach(btn_delete, 0, 7, 2, 1)
 
 		colorh="#FF3333"        
 		color=Gdk.RGBA()
