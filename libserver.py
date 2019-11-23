@@ -50,8 +50,25 @@ def get_exercises_json(db):
 
 def get_exercises_of_workout(db, workout_id):
     exercises = db.exercises_to_workout.find({'routine_id': workout_id})
-    print(exercises)
     return exercises
+
+
+def update_exercise(db, query):
+    print(query)
+    workout_id, exercise_id, no = query.split(",")
+    exercises_to_workout = db.exercises_to_workout
+    print(no)
+    
+    item = {"routine_id" : workout_id, "exercise_id": exercise_id}
+    for exrex in exercises_to_workout.find(item):
+        print(exrex)
+    new_value = {"no" : no}
+    try:
+        exercises_to_workout.update_one(item, new_value)
+        answer = "OK"
+    except:
+        answer = "Error occured"
+    return answer
 
 
 class Message:
@@ -132,7 +149,7 @@ class Message:
 
     def _create_response_json_content(self):
         client = MongoClient('localhost', 27017)
-        db = client.fitness_test
+        db = client.fitness
         workouts_json = get_workouts_json(db)
         action = self.request.get("action")
         answer = None
@@ -145,6 +162,9 @@ class Message:
             content = {"result": answer}
         elif action == "search_exercises":
             answer = get_exercises_json(db)
+            content = {"result": answer}
+        elif action == "update_exercise":
+            answer = update_exercise(db, query)
             content = {"result": answer}
         elif action == "delete":
             if query[0] == "workout":
@@ -234,7 +254,7 @@ class Message:
         self._write()
 
     def close(self):
-        print("closing connection to", self.addr)
+        #print("closing connection to", self.addr)
         try:
 		#socket is no longer monitored by select()
             self.selector.unregister(self.sock)

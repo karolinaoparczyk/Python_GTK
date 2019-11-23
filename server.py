@@ -12,7 +12,7 @@ sel = selectors.DefaultSelector()
 
 def accept_wrapper(sock):
     conn, addr = sock.accept()  # Should be ready to read
-    print("accepted connection from", addr)
+    #print("accepted connection from", addr)
     conn.setblocking(False) #otherwise all other sockets are left waiting for this one (hang state)
     message = libserver.Message(sel, conn, addr)
     sel.register(conn, selectors.EVENT_READ, data=message)

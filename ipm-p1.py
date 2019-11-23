@@ -29,10 +29,6 @@ class MyWindow(Gtk.Window):
 		Gtk.Window.__init__(self, title="IPM P1")
 		self.set_default_size(700, 500)
 		
-		# get collections from database
-		self.workouts = define_connection('search_workouts', 'workouts')
-		self.render_workouts()	
-		
 		self.wk_grid = Gtk.Grid()
 		self.wk_grid.set_column_homogeneous(True)
 		self.wk_grid.set_row_spacing(20)
@@ -42,6 +38,10 @@ class MyWindow(Gtk.Window):
 		self.scrolled_window.set_border_width(10)
 		self.add(self.scrolled_window)
 		self.scrolled_window.add(self.wk_grid)
+
+		# get collections from database
+		self.workouts = define_connection('search_workouts', 'workouts')
+		self.render_workouts()	
 
 		self.exercises = define_connection('search_exercises', 'exercises')
 		self.render_exercises()
@@ -54,6 +54,7 @@ class MyWindow(Gtk.Window):
 				self.all_exercises.append(exercise)
 			except:
 				pass
+
 		self.all_workouts = []
 		# make objects from all workouts in database
 		exercises_not_in_db = []
@@ -62,14 +63,14 @@ class MyWindow(Gtk.Window):
 			workout = Workout(workout_db['_id'], workout_db['name'], workout_db['description'], workout_db['image'])
 			# attach proper exercises to the workout
 			exercises_of_workout = []
-			
 			no = 1
 			for workout_ex in workout_db['exercises']:
 				found_exercise_in_db = False
 				for exercise in self.all_exercises:
 					if found_exercise_in_db is False and workout_ex[0] == exercise.name:
+						id_ = random.randint(1, 10000000)
 						found_exercise_in_db = True
-						ex_of_workout = ExerciseToWorkout(workout.id, exercise.id, workout_ex[1], no)
+						ex_of_workout = ExerciseToWorkout(id_, workout.id, exercise.id, workout_ex[1], no)
 						no = no + 1
 						exercises_of_workout.append(ex_of_workout)
 
@@ -362,14 +363,18 @@ class MyWindow(Gtk.Window):
 	def change_exercise_position(self, widget, *data):
 		exercises = data[2].exercises
 		exercises_in_new_order = []
+		first_obj = None
+		second_obj = None
 		if data[0] == 0:
 			for ex in exercises:
 				if ex.no == data[1].no - 1:
 					ex.no = ex.no + 1
 					data[1].no = data[1].no - 1
 					exercises_in_new_order.append(data[1])
+					first_obj = data[1]
 					exercises_in_new_order.append(ex)
-				else:
+					second_obj = ex
+				elif ex.no != data[1].no:
 					exercises_in_new_order.append(ex)
 			
 		elif data[0] == 1:
@@ -381,9 +386,16 @@ class MyWindow(Gtk.Window):
 					element_to_right = data[1].__copy__()
 					element_to_right.no = data[1].no + 1
 					exercises_in_new_order.append(element_to_left)
+					first_obj + element_to_left
 					exercises_in_new_order.append(element_to_right)
+					second_obj = element_to_right
 				elif ex.no != data[1].no:
 					exercises_in_new_order.append(ex)
+
+		if first_obj is not None and second_obj is not None:
+			query = str(first_obj.routine_id) + "," + str(first_obj.exercise_id) + "," + str(first_obj.no)
+			result = define_connection("update_exercise", query)
+			print(result)
 
 		data[2].set_exercises(exercises_in_new_order)
 		self.make_exercises_grid(data[2])

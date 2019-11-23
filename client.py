@@ -11,7 +11,7 @@ sel = selectors.DefaultSelector()
 
 
 def create_request(action, value):
-    if action == "search_workouts" or action == "search_exercises" or action == "search_exercises_by_workout" or action == 'delete' or action == 'insert_ex' or action == 'insert_ex_to_wk':
+    if action == "search_workouts" or action == "search_exercises" or action == "search_exercises_by_workout" or action == 'delete' or action == 'insert_ex' or action == 'insert_ex_to_wk' or action == "update_exercise":
         return dict(
             type="text/json",
             encoding="utf-8",

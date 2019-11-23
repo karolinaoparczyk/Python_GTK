@@ -1,14 +1,18 @@
 First meet the requirements listed in requirements.txt.
+Load data to database:
+mongorestore --db fitness --collection workouts workouts.bson
+mongorestore --db fitness --collection exercises exercises.bson
+
 Then run
 
 python server.py
 
 and in another terminal
 
-python imp-p1.py
+python ipm-p1.py
 
 If this is your first time opening the app, run
 
-python imp-p1.py 1
+python ipm-p1.py 1
 
 which will update database

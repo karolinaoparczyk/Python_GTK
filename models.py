@@ -45,7 +45,8 @@ class Exercise:
 
 
 class ExerciseToWorkout:
-	def __init__(self, routine_id, exercise_id, length, no):
+	def __init__(self, id_, routine_id, exercise_id, length, no):
+		self.id_ = id_
 		self.exercise_id = exercise_id
 		self.routine_id = routine_id		
 		self.length = length
@@ -55,4 +56,4 @@ class ExerciseToWorkout:
 		return self.lenght
 
 	def __copy__(self):
-       		return type(self)(self.routine_id, self.exercise_id, self.length, self.no)
+       		return type(self)(self.id_, self.routine_id, self.exercise_id, self.length, self.no)
