@@ -364,11 +364,15 @@ class MyWindow(Gtk.Window):
 		exercises = data[2].exercises
 		exercises_in_new_order = []
 		first_obj = None
+		first_old_no = None
 		second_obj = None
+		second_old_no = None
 		if data[0] == 0:
 			for ex in exercises:
 				if ex.no == data[1].no - 1:
+					second_old_no = ex.no
 					ex.no = ex.no + 1
+					first_old_no = data[1].no
 					data[1].no = data[1].no - 1
 					exercises_in_new_order.append(data[1])
 					first_obj = data[1]
@@ -386,16 +390,17 @@ class MyWindow(Gtk.Window):
 					element_to_right = data[1].__copy__()
 					element_to_right.no = data[1].no + 1
 					exercises_in_new_order.append(element_to_left)
-					first_obj + element_to_left
+					first_obj = element_to_left
+					first_old_no = ex.no
 					exercises_in_new_order.append(element_to_right)
 					second_obj = element_to_right
+					second_old_no = data[1].no
 				elif ex.no != data[1].no:
 					exercises_in_new_order.append(ex)
 
 		if first_obj is not None and second_obj is not None:
-			query = str(first_obj.routine_id) + "," + str(first_obj.exercise_id) + "," + str(first_obj.no)
+			query = str(first_obj.routine_id) + "," + str(first_obj.exercise_id) + "," + str(first_old_no) + "," + str(first_obj.no)
 			result = define_connection("update_exercise", query)
-			print(result)
 
 		data[2].set_exercises(exercises_in_new_order)
 		self.make_exercises_grid(data[2])

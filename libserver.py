@@ -54,17 +54,13 @@ def get_exercises_of_workout(db, workout_id):
 
 
 def update_exercise(db, query):
-    print(query)
-    workout_id, exercise_id, no = query.split(",")
+    workout_id, exercise_id, old_no, new_no = query.split(",")
     exercises_to_workout = db.exercises_to_workout
-    print(no)
     
-    item = {"routine_id" : workout_id, "exercise_id": exercise_id}
-    for exrex in exercises_to_workout.find(item):
-        print(exrex)
-    new_value = {"no" : no}
+    item = {"routine_id" : workout_id, "exercise_id": exercise_id, "no": int(old_no)}
+    new_value = { "$set": { "no": int(new_no) } }
     try:
-        exercises_to_workout.update_one(item, new_value)
+        result = exercises_to_workout.update_one(item, new_value)
         answer = "OK"
     except:
         answer = "Error occured"
