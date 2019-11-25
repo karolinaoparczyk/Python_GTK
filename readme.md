@@ -1,4 +1,7 @@
 First meet the requirements listed in requirements.txt.
+
+Create database named "fitness"
+
 Load data to database:
 mongorestore --db fitness --collection workouts workouts.bson
 mongorestore --db fitness --collection exercises exercises.bson
